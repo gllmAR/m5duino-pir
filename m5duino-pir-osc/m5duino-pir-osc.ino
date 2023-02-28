@@ -1,8 +1,8 @@
 /*
 Sensor TOF to osc broadcast using microOSC
 */
-byte ID = 1;
-#define SAMPLING 100
+byte ID = 8;
+#define SAMPLING 25
 #include <Ethernet2.h>
 EthernetUDP udp;
 
@@ -11,8 +11,8 @@ EthernetUDP udp;
 
 IPAddress broadcastIp(192, 168, 1, 255);
 IPAddress sendIp(192, 168, 1, 255);
-unsigned int sendPort = 50501;
-unsigned int receivePort = 50500;
+unsigned int sendPort = 55000;
+unsigned int receivePort = 55001;
 
 unsigned long myChronoStart = 0;
 
@@ -46,6 +46,7 @@ byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xAE, ID };
 #include "M5Atom.h"
 
 // couleur du led
+#define WHITE 0xff, 0xff, 0xff
 #define RED 0xff, 0x00, 0x00
 #define YELLOW 0xff, 0xff, 0x00
 #define GREEN 0x00, 0xff, 0x00
@@ -123,20 +124,26 @@ void loop() {
   unsigned long myChronoInterval = SAMPLING;
   if ( myChronoElapsed >= myChronoInterval) {
     myChronoStart = millis();
-     oscUdp.sendMessage("/pir", "i" "i" "s", digitalRead(PIRPIN), ID, (Ethernet.localIP().toString()));
+    oscUdp.sendMessage("/pir", "i" "i" "s", ID, digitalRead(PIRPIN), (Ethernet.localIP().toString()));
   }
-  
+
+   if( digitalRead(PIRPIN)) 
+     {
+        set_m5_led(PINK);  // IF here; ethernet initialize
+     } else{
+        set_m5_led(WHITE);  // IF here; ethernet initialize
+     }
 
   
 
   if (M5.Btn.wasPressed()) {
     Serial.println("BTN 1");
-    oscUdp.sendMessage("/btn", "i" "i" "s", 1,ID, (Ethernet.localIP().toString()) );
+    oscUdp.sendMessage("/btn", "i" "i" "s", ID, 1, (Ethernet.localIP().toString()) );
     cycle_m5_color(10);
   }
   if (M5.Btn.wasReleased()) {
     Serial.println("BTN 0");
-    oscUdp.sendMessage("/btn", "i" "i" "s", 0,ID, (Ethernet.localIP().toString()));
+    oscUdp.sendMessage("/btn", "i" "i" "s", ID, 0, (Ethernet.localIP().toString()));
     cycle_m5_color(10);
   }
   
